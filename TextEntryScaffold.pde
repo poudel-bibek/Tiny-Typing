@@ -17,10 +17,24 @@ final int DPIofYourDeviceScreen = 120; //you will need to look up the DPI or PPI
 final float sizeOfInputArea = DPIofYourDeviceScreen*1; //aka, 1.0 inches square!
 PImage watch;
 PImage finger;
+String[] lettersRed = {"A", "B", "C", "D", "E", "F", "G", "H", "I"};
+String[] lettersGreen = {"J", "K", "L", "M", "N", "O", "P", "Q", "R"};
+String[] lettersBlue = {"S", "T", "U", "V", "W", "X", "Y", "Z"};
+int startIdxRed = 0, startIdxGreen = 0, startIdxBlue = 0;
 
 //Variables for my silly implementation. You can delete this:
 char currentLetter = 'a';
 
+int scrollRed = 0;
+int scrollGreen = 0;
+int scrollBlue = 0;
+boolean scrollingRed = false;
+boolean scrollingGreen = false;
+boolean scrollingBlue = false;
+
+float sectionWidth = sizeOfInputArea / 3;
+float sectionHeight = 0.72 * sizeOfInputArea; 
+    
 //You can modify anything in here. This is just a basic implementation.
 void setup()
 {
@@ -35,6 +49,7 @@ void setup()
   size(800, 800); //Sets the size of the app. You should modify this to your device's native size. Many phones today are 1080 wide by 1920 tall.
   textFont(createFont("Arial", 20)); //set the font to arial 24. Creating fonts is expensive, so make difference sizes once in setup, not draw
   noStroke(); //my code doesn't use any strokes
+  
 }
 
 //You can modify anything in here. This is just a basic implementation.
@@ -94,17 +109,49 @@ void draw()
     rect(600, 600, 200, 200); //draw next button
     fill(255);
     text("NEXT > ", 650, 650); //draw next label
+    
+    // Draw the keyboard layout
+    float yOffset = 0.50 * height; // The vertical starting position of the letters.
+    int lineHeight = 30; // Height of each letter line, adjust as appropriate.
+    float sectionY = 0.47 * height;
 
-    //example design draw code
-    fill(255, 0, 0); //red button
-    rect(width/2-sizeOfInputArea/2, height/2-sizeOfInputArea/2+sizeOfInputArea/2, sizeOfInputArea/2, sizeOfInputArea/2); //draw left red button
-    fill(0, 255, 0); //green button
-    rect(width/2-sizeOfInputArea/2+sizeOfInputArea/2, height/2-sizeOfInputArea/2+sizeOfInputArea/2, sizeOfInputArea/2, sizeOfInputArea/2); //draw right green button
-    textAlign(CENTER);
-    fill(200);
-    text("" + currentLetter, width/2, height/2-sizeOfInputArea/4); //draw current letter
+    // Draw the Red section with scrolling:
+    fill(255, 0, 0);
+    rect(width / 2 - sizeOfInputArea / 2, 0.47 * height, sectionWidth, sectionHeight);
+    fill(0, 0, 0);
+    for (int i = 0; i < lettersRed.length; i++) {
+      int letterY = int(yOffset - scrollRed + lineHeight * i);
+      if (letterY >= sectionY && letterY <= sectionY + sectionHeight){
+        text(lettersRed[i], width / 2 - sizeOfInputArea / 2 + 10, letterY); 
+      }
+    }
+
+    //for (int i = 0; i < lettersRed.length; i++) {
+    //  text(lettersRed[i], width / 2 - sizeOfInputArea / 2 + 10, yOffset - scrollRed + lineHeight * i);
+    //}
+    
+    //fill(255, 0, 0); // Red section
+    //rect(width/2-sizeOfInputArea/2, 0.47*height, sectionWidth, 0.72*sizeOfInputArea);
+    //fill(0, 0, 0);
+    //for (int i = startIdxRed; i < min(startIdxRed + 3, lettersRed.length); i++) {
+    //text(lettersRed[i], width/2 - sizeOfInputArea/2 + 10, 0.50*height + 30 * (i - startIdxRed));
+    //}
+    
+    fill(0, 255, 0); // Green section
+    rect(width/2-sizeOfInputArea/2 + sectionWidth, 0.47*height, sectionWidth, 0.72*sizeOfInputArea);
+    fill(0, 0, 0);
+    for (int i = startIdxBlue; i < min(startIdxBlue + 3, lettersBlue.length); i++) {
+    text(lettersBlue[i], width/2 - sizeOfInputArea/2 + sectionWidth + 10, 0.50*height + 30 * (i - startIdxBlue));
+    }
+    
+    fill(0, 0, 255); // Blue section
+    rect(width/2-sizeOfInputArea/2 + 2*sectionWidth, 0.47*height, sectionWidth, 0.72*sizeOfInputArea);
+    fill(0, 0, 0);
+    for (int i = startIdxGreen; i < min(startIdxGreen + 3, lettersGreen.length); i++) {
+    text(lettersGreen[i], width/2 - sizeOfInputArea/2 + 2*sectionWidth + 10, 0.50*height + 30 * (i - startIdxGreen));
+    }
+    
   }
- 
  
   //drawFinger(); //no longer needed as we'll be deploying to an actual touschreen device
 }
@@ -115,38 +162,43 @@ boolean didMouseClick(float x, float y, float w, float h) //simple function to d
   return (mouseX > x && mouseX<x+w && mouseY>y && mouseY<y+h); //check to see if it is in button bounds
 }
 
-//my terrible implementation you can entirely replace
-void mousePressed()
-{
-  if (didMouseClick(width/2-sizeOfInputArea/2, height/2-sizeOfInputArea/2+sizeOfInputArea/2, sizeOfInputArea/2, sizeOfInputArea/2)) //check if click in left button
-  {
-    currentLetter --;
-    if (currentLetter<'_') //wrap around to z
-      currentLetter = 'z';
-  }
 
-  if (didMouseClick(width/2-sizeOfInputArea/2+sizeOfInputArea/2, height/2-sizeOfInputArea/2+sizeOfInputArea/2, sizeOfInputArea/2, sizeOfInputArea/2)) //check if click in right button
-  {
-    currentLetter ++;
-    if (currentLetter>'z') //wrap back to space (aka underscore)
-      currentLetter = '_';
+void mousePressed() {
+  
+  // Check if the press is within the bounds of the red section:
+  if (didMouseClick(width / 2 - sizeOfInputArea / 2, 0.47 * height, sectionWidth, sectionHeight)) {
+    scrollingRed = true;
   }
-
-  if (didMouseClick(width/2-sizeOfInputArea/2, height/2-sizeOfInputArea/2, sizeOfInputArea, sizeOfInputArea/2)) //check if click occured in letter area
-  {
-    if (currentLetter=='_') //if underscore, consider that a space bar
-      currentTyped+=" ";
-    else if (currentLetter=='`' & currentTyped.length()>0) //if `, treat that as a delete command
-      currentTyped = currentTyped.substring(0, currentTyped.length()-1);
-    else if (currentLetter!='`') //if not any of the above cases, add the current letter to the typed string
-      currentTyped+=currentLetter;
-  }
+  // Similarly apply the same for scrollingGreen and scrollingBlue for the other sections by adjusting x position.
 
   //You are allowed to have a next button outside the 1" area
   if (didMouseClick(600, 600, 200, 200)) //check if click is in next button
   {
     nextTrial(); //if so, advance to next trial
   }
+}
+
+void mouseDragged() {
+  float scrollSpeed = 1; // Customize the scroll speed or implement a dynamic calculation based on drag speed.
+  
+  if (scrollingRed) {
+    scrollRed -= (mouseY - pmouseY) * scrollSpeed; // 'pmouseY' is the previous mouseY position, automatically stored by Processing.
+    int lettersHeight = lettersRed.length * 30;
+    scrollRed = constrain(scrollRed, 0, max(0, lettersHeight - int(sectionHeight)));
+
+    //scrollRed = constrain(scrollRed, 0, max(0, lettersRed.length * 30 - sectionHeight)); // Ensure scrolling stays within bounds.
+    
+    // Optionally add 'pmouseY' to 'scrollRed' multiplied by a speed factor if you want to control scroll sensitivity.
+  }
+  // Similar logic for scrollingGreen and scrollingBlue.
+}
+
+
+void mouseReleased() {
+  // Reset all scrolling flags when the user releases the mouse.
+  scrollingRed = false;
+  scrollingGreen = false;
+  scrollingBlue = false;
 }
 
 
