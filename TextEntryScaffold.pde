@@ -113,12 +113,12 @@ void draw()
     // Draw the keyboard layout
     float yOffset = 0.50 * height; // The vertical starting position of the letters.
     int lineHeight = 30; // Height of each letter line, adjust as appropriate.
-    float sectionY = 0.47 * height;
+    float sectionY = 0.48 * height;
 
     // Draw the Red section with scrolling:
     fill(255, 0, 0);
     rect(width / 2 - sizeOfInputArea / 2, 0.47 * height, sectionWidth, sectionHeight);
-    fill(0, 0, 0);
+    fill(255, 255, 255);
     for (int i = 0; i < lettersRed.length; i++) {
       int letterY = int(yOffset - scrollRed + lineHeight * i);
       if (letterY >= sectionY && letterY <= sectionY + sectionHeight){
@@ -126,29 +126,26 @@ void draw()
       }
     }
 
-    //for (int i = 0; i < lettersRed.length; i++) {
-    //  text(lettersRed[i], width / 2 - sizeOfInputArea / 2 + 10, yOffset - scrollRed + lineHeight * i);
-    //}
-    
-    //fill(255, 0, 0); // Red section
-    //rect(width/2-sizeOfInputArea/2, 0.47*height, sectionWidth, 0.72*sizeOfInputArea);
-    //fill(0, 0, 0);
-    //for (int i = startIdxRed; i < min(startIdxRed + 3, lettersRed.length); i++) {
-    //text(lettersRed[i], width/2 - sizeOfInputArea/2 + 10, 0.50*height + 30 * (i - startIdxRed));
-    //}
-    
-    fill(0, 255, 0); // Green section
-    rect(width/2-sizeOfInputArea/2 + sectionWidth, 0.47*height, sectionWidth, 0.72*sizeOfInputArea);
-    fill(0, 0, 0);
-    for (int i = startIdxBlue; i < min(startIdxBlue + 3, lettersBlue.length); i++) {
-    text(lettersBlue[i], width/2 - sizeOfInputArea/2 + sectionWidth + 10, 0.50*height + 30 * (i - startIdxBlue));
+    // Green section
+    fill(0, 255, 0); 
+    rect(width/2-sizeOfInputArea/2 + sectionWidth, 0.47*height, sectionWidth, sectionHeight);
+    fill(255, 255, 255);
+    for (int i = 0; i < lettersGreen.length; i++) {
+      int letterY = int(yOffset - scrollGreen + lineHeight * i);
+      if (letterY >= sectionY && letterY <= sectionY + sectionHeight) {
+        text(lettersGreen[i], width/2 - sizeOfInputArea/2 + sectionWidth + 10, letterY);
+      }
     }
     
-    fill(0, 0, 255); // Blue section
-    rect(width/2-sizeOfInputArea/2 + 2*sectionWidth, 0.47*height, sectionWidth, 0.72*sizeOfInputArea);
-    fill(0, 0, 0);
-    for (int i = startIdxGreen; i < min(startIdxGreen + 3, lettersGreen.length); i++) {
-    text(lettersGreen[i], width/2 - sizeOfInputArea/2 + 2*sectionWidth + 10, 0.50*height + 30 * (i - startIdxGreen));
+    // Blue section
+    fill(0, 0, 255);
+    rect(width/2-sizeOfInputArea/2 + 2*sectionWidth, 0.47*height, sectionWidth, sectionHeight); 
+    fill(255, 255, 255);
+    for (int i = 0; i < lettersBlue.length; i++) {
+      int letterY = int(yOffset - scrollBlue + lineHeight * i);
+      if (letterY >= sectionY && letterY <= sectionY + sectionHeight) {
+        text(lettersBlue[i], width/2 - sizeOfInputArea/2 + 2*sectionWidth + 10, letterY);
+      }
     }
     
   }
@@ -165,11 +162,22 @@ boolean didMouseClick(float x, float y, float w, float h) //simple function to d
 
 void mousePressed() {
   
-  // Check if the press is within the bounds of the red section:
+  // Check if the press is within the bounds
+
+  // Red Section
   if (didMouseClick(width / 2 - sizeOfInputArea / 2, 0.47 * height, sectionWidth, sectionHeight)) {
-    scrollingRed = true;
+    scrollingRed = true; 
   }
-  // Similarly apply the same for scrollingGreen and scrollingBlue for the other sections by adjusting x position.
+  
+  // Green Section 
+  if (didMouseClick(width/2 - sizeOfInputArea/2 + sectionWidth, 0.47*height, sectionWidth, sectionHeight)) {
+    scrollingGreen = true;
+  }
+  
+  // Blue Section
+  if (didMouseClick(width/2 - sizeOfInputArea/2 + 2*sectionWidth, 0.47*height, sectionWidth, sectionHeight)) {
+    scrollingBlue = true;  
+  }
 
   //You are allowed to have a next button outside the 1" area
   if (didMouseClick(600, 600, 200, 200)) //check if click is in next button
@@ -184,14 +192,27 @@ void mouseDragged() {
   if (scrollingRed) {
     scrollRed -= (mouseY - pmouseY) * scrollSpeed; // 'pmouseY' is the previous mouseY position, automatically stored by Processing.
     int lettersHeight = lettersRed.length * 30;
-    scrollRed = constrain(scrollRed, 0, max(0, lettersHeight - int(sectionHeight)));
-
-    //scrollRed = constrain(scrollRed, 0, max(0, lettersRed.length * 30 - sectionHeight)); // Ensure scrolling stays within bounds.
-    
+    scrollRed = constrain(scrollRed, 0, max(0, lettersHeight - int(sectionHeight)));    
     // Optionally add 'pmouseY' to 'scrollRed' multiplied by a speed factor if you want to control scroll sensitivity.
   }
-  // Similar logic for scrollingGreen and scrollingBlue.
+  
+  if (scrollingGreen) {
+    scrollGreen -= (mouseY - pmouseY) * scrollSpeed; // 'pmouseY' is the previous mouseY position, automatically stored by Processing.
+    int lettersHeight = lettersGreen.length * 30;
+    scrollGreen = constrain(scrollGreen, 0, max(0, lettersHeight - int(sectionHeight)));    
+    // Optionally add 'pmouseY' to 'scrollRed' multiplied by a speed factor if you want to control scroll sensitivity.
+  }
+  
+  if (scrollingBlue) {
+    scrollBlue -= (mouseY - pmouseY) * scrollSpeed; // 'pmouseY' is the previous mouseY position, automatically stored by Processing.
+    int lettersHeight = lettersBlue.length * 30;
+    scrollBlue = constrain(scrollBlue, 0, max(0, lettersHeight - int(sectionHeight)));    
+    // Optionally add 'pmouseY' to 'scrollRed' multiplied by a speed factor if you want to control scroll sensitivity.
+  }
 }
+
+
+
 
 
 void mouseReleased() {
