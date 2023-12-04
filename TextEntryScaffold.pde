@@ -43,6 +43,9 @@ int letterHeight;
 float midX; 
 float rightX;
 float topY;
+boolean dragging = false;
+int dragStartX, dragStartY;
+int minDragDist = int(0.2*DPIofYourDeviceScreen); 
 
 //You can modify anything in here. This is just a basic implementation.
 void setup()
@@ -172,32 +175,10 @@ boolean didMouseClick(float x, float y, float w, float h) //simple function to d
 }
 
 void mousePressed() {
-  String[] sectionLetters;
-  int startIndex;
+  dragging = false; 
+  dragStartX = mouseX;
+  dragStartY = mouseY; 
   
-  float letterHeight = 30; // Based on your letter height
-
-  if (mouseX < midX) {
-    sectionLetters = lettersRed; 
-    startIndex = visibleRedStart;
-
-  } else if (mouseX < rightX) {
-    sectionLetters = lettersGreen;
-    startIndex = visibleGreenStart;
-  
-  } else {
-    sectionLetters = lettersBlue;
-    startIndex = visibleBlueStart; 
-  }
-
-  int indexInSection = int((mouseY - topY) / letterHeight);
-
-  if (indexInSection >= 0 && indexInSection < 3) {  
-    // Check valid letter index  
-    String letterClicked = sectionLetters[startIndex + indexInSection]; 
-    currentTyped += letterClicked; 
-  }
-
   // Scroll section selection
   if (didMouseClick(width / 2 - sizeOfInputArea / 2, 0.47 * height, sectionWidth, sectionHeight)) {
      scrollingRed = true;
@@ -217,8 +198,14 @@ void mousePressed() {
 }
 
 void mouseDragged() {
+  int dragDistX = abs(dragStartX - mouseX); 
+  int dragDistY = abs(dragStartY - mouseY);
   
-  float scrollSpeed = 1; // Customize the scroll speed or implement a dynamic calculation based on drag speed.
+  if(dragDistX >= minDragDist || dragDistY >= minDragDist) {
+  dragging = true;
+  }
+  
+  float scrollSpeed = 0.95; // Customize the scroll speed or implement a dynamic calculation based on drag speed.
   
   if (scrollingRed) {
     scrollRed -= (mouseY - pmouseY) * scrollSpeed; // 'pmouseY' is the previous mouseY position, automatically stored by Processing.
@@ -251,11 +238,41 @@ void mouseDragged() {
 }
 
 void mouseReleased() {
-    // Wasn't dragged, process as click
-    // Reset all scrolling flags when the user releases the mouse.
-    scrollingRed = false;
-    scrollingGreen = false;
-    scrollingBlue = false;
+    
+  if(!dragging) {
+    String[] sectionLetters;
+    int startIndex;
+    
+    float letterHeight = int(0.25 * DPIofYourDeviceScreen); // Based on your letter height
+  
+    if (mouseX < midX) {
+      sectionLetters = lettersRed; 
+      startIndex = visibleRedStart;
+  
+    } else if (mouseX < rightX) {
+      sectionLetters = lettersGreen;
+      startIndex = visibleGreenStart;
+    
+    } else {
+      sectionLetters = lettersBlue;
+      startIndex = visibleBlueStart; 
+    }
+  
+    int indexInSection = int((mouseY - topY) / letterHeight);
+  
+    if (indexInSection >= 0 && indexInSection < 3) {  
+      // Check valid letter index  
+      String letterClicked = sectionLetters[startIndex + indexInSection]; 
+      currentTyped += letterClicked; 
+    }
+  
+  }
+  // Wasn't dragged, process as click
+  // Reset all scrolling flags when the user releases the mouse.
+  scrollingRed = false;
+  scrollingGreen = false;
+  scrollingBlue = false;
+    
 }
 
 
