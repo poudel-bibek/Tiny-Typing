@@ -33,7 +33,7 @@ boolean scrollingGreen = false;
 boolean scrollingBlue = false;
 
 float sectionWidth = 0.33 * sizeOfInputArea;
-float sectionHeight = 0.72 * sizeOfInputArea; 
+float sectionHeight = 0.75 * sizeOfInputArea; 
     
 int visibleRedStart = 0; 
 int visibleGreenStart = 0;
@@ -46,6 +46,8 @@ float topY;
 boolean dragging = false;
 int dragStartX, dragStartY;
 int minDragDist = int(0.2*DPIofYourDeviceScreen); 
+float calculation;
+int indexInSection;
 
 //You can modify anything in here. This is just a basic implementation.
 void setup()
@@ -62,7 +64,7 @@ void setup()
   textFont(createFont("Arial", 20)); //set the font to arial 24. Creating fonts is expensive, so make difference sizes once in setup, not draw
   noStroke(); //my code doesn't use any strokes
   
-  topY = 0.47 * height;  
+  topY = 0.505 * height;  
   midX = width / 2 - sizeOfInputArea / 2 + sectionWidth; 
   rightX = midX + sectionWidth;
 }
@@ -206,29 +208,29 @@ void mouseDragged() {
   }
   
   float scrollSpeed = 0.95; // Customize the scroll speed or implement a dynamic calculation based on drag speed.
+  letterHeight = int(0.25 * sizeOfInputArea); // Height of each letter line
   
   if (scrollingRed) {
     scrollRed -= (mouseY - pmouseY) * scrollSpeed; // 'pmouseY' is the previous mouseY position, automatically stored by Processing.
-    int lettersHeight = lettersRed.length * 30;
+    int lettersHeight = lettersRed.length * letterHeight;
+    
     scrollRed = constrain(scrollRed, 0, max(0, lettersHeight - int(sectionHeight)));    
     // Optionally add 'pmouseY' to 'scrollRed' multiplied by a speed factor if you want to control scroll sensitivity.
   }
   
   if (scrollingGreen) {
     scrollGreen -= (mouseY - pmouseY) * scrollSpeed; // 'pmouseY' is the previous mouseY position, automatically stored by Processing.
-    int lettersHeight = lettersGreen.length * 30;
+    int lettersHeight = lettersGreen.length * letterHeight;
     scrollGreen = constrain(scrollGreen, 0, max(0, lettersHeight - int(sectionHeight)));    
     // Optionally add 'pmouseY' to 'scrollRed' multiplied by a speed factor if you want to control scroll sensitivity.
   }
   
   if (scrollingBlue) {
     scrollBlue -= (mouseY - pmouseY) * scrollSpeed; // 'pmouseY' is the previous mouseY position, automatically stored by Processing.
-    int lettersHeight = lettersBlue.length * 30;
+    int lettersHeight = lettersBlue.length * letterHeight;
     scrollBlue = constrain(scrollBlue, 0, max(0, lettersHeight - int(sectionHeight)));    
     // Optionally add 'pmouseY' to 'scrollRed' multiplied by a speed factor if you want to control scroll sensitivity.
   }
-  
-  letterHeight = int(0.25 * DPIofYourDeviceScreen); // Height of each letter line
   
   // Update visible indexes after scrolling
   visibleRedStart = floor(scrollRed / letterHeight);
@@ -243,7 +245,7 @@ void mouseReleased() {
     String[] sectionLetters;
     int startIndex;
     
-    float letterHeight = int(0.25 * DPIofYourDeviceScreen); // Based on your letter height
+    float letterHeight = int(0.25 * sizeOfInputArea); // Based on your letter height
   
     if (mouseX < midX) {
       sectionLetters = lettersRed; 
@@ -257,14 +259,41 @@ void mouseReleased() {
       sectionLetters = lettersBlue;
       startIndex = visibleBlueStart; 
     }
-  
-    int indexInSection = int((mouseY - topY) / letterHeight);
-  
+    
+    // Manual ranges
+    //If calculation is in range -0.96 to 0.1, then int indexInSection = 0
+    //If calculation is in range 0.1 to 1.1, then int indexInSection = 1
+    //If calculation is in range 1.1 to 2.0, then int indexInSection = 2
+    calculation = (mouseY - topY) / letterHeight;
+    if (calculation >= -0.96 && calculation <= 0.1){
+      indexInSection = 0;
+    }
+    else if (calculation >= 0.1 && calculation <= 1.1){
+      indexInSection = 1;
+    }
+    else if (calculation >= 1.1 && calculation <= 2.0){
+      indexInSection = 2;
+    }
+    else{
+      indexInSection = -1;
+    }
+    
     if (indexInSection >= 0 && indexInSection < 3) {  
       // Check valid letter index  
       String letterClicked = sectionLetters[startIndex + indexInSection]; 
       currentTyped += letterClicked; 
     }
+    
+    //int indexInSection = int((mouseY - topY) / letterHeight);
+    //println("mouseY" + indexInSection);
+    //println("topY" + indexInSection);
+    //println("Calculation" + (mouseY - topY) / letterHeight);
+    //println("Index" + indexInSection);
+    //if (indexInSection >= 0 && indexInSection < 3) {  
+    //  // Check valid letter index  
+    //  String letterClicked = sectionLetters[startIndex + indexInSection]; 
+    //  currentTyped += letterClicked; 
+    //}
   
   }
   // Wasn't dragged, process as click
