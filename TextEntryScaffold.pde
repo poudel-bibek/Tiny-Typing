@@ -32,9 +32,18 @@ boolean scrollingRed = false;
 boolean scrollingGreen = false;
 boolean scrollingBlue = false;
 
-float sectionWidth = sizeOfInputArea / 3;
+float sectionWidth = 0.33 * sizeOfInputArea;
 float sectionHeight = 0.72 * sizeOfInputArea; 
     
+int visibleRedStart = 0; 
+int visibleGreenStart = 0;
+int visibleBlueStart = 0;
+int letterHeight;  
+
+float midX; 
+float rightX;
+float topY;
+
 //You can modify anything in here. This is just a basic implementation.
 void setup()
 {
@@ -50,6 +59,9 @@ void setup()
   textFont(createFont("Arial", 20)); //set the font to arial 24. Creating fonts is expensive, so make difference sizes once in setup, not draw
   noStroke(); //my code doesn't use any strokes
   
+  topY = 0.47 * height;  
+  midX = width / 2 - sizeOfInputArea / 2 + sectionWidth; 
+  rightX = midX + sectionWidth;
 }
 
 //You can modify anything in here. This is just a basic implementation.
@@ -112,7 +124,7 @@ void draw()
     
     // Draw the keyboard layout
     float yOffset = 0.50 * height; // The vertical starting position of the letters.
-    int lineHeight = 30; // Height of each letter line, adjust as appropriate.
+    int lineHeight = int(0.25 * DPIofYourDeviceScreen); // Height of each letter line
     float sectionY = 0.48 * height;
 
     // Draw the Red section with scrolling:
@@ -159,34 +171,53 @@ boolean didMouseClick(float x, float y, float w, float h) //simple function to d
   return (mouseX > x && mouseX<x+w && mouseY>y && mouseY<y+h); //check to see if it is in button bounds
 }
 
-
 void mousePressed() {
+  String[] sectionLetters;
+  int startIndex;
   
-  // Check if the press is within the bounds
+  float letterHeight = 30; // Based on your letter height
 
-  // Red Section
+  if (mouseX < midX) {
+    sectionLetters = lettersRed; 
+    startIndex = visibleRedStart;
+
+  } else if (mouseX < rightX) {
+    sectionLetters = lettersGreen;
+    startIndex = visibleGreenStart;
+  
+  } else {
+    sectionLetters = lettersBlue;
+    startIndex = visibleBlueStart; 
+  }
+
+  int indexInSection = int((mouseY - topY) / letterHeight);
+
+  if (indexInSection >= 0 && indexInSection < 3) {  
+    // Check valid letter index  
+    String letterClicked = sectionLetters[startIndex + indexInSection]; 
+    currentTyped += letterClicked; 
+  }
+
+  // Scroll section selection
   if (didMouseClick(width / 2 - sizeOfInputArea / 2, 0.47 * height, sectionWidth, sectionHeight)) {
-    scrollingRed = true; 
-  }
+     scrollingRed = true;
+
+  } else if (didMouseClick(width/2 - sizeOfInputArea/2 + sectionWidth, 0.47*height, sectionWidth, sectionHeight)) {
+     scrollingGreen = true;
   
-  // Green Section 
-  if (didMouseClick(width/2 - sizeOfInputArea/2 + sectionWidth, 0.47*height, sectionWidth, sectionHeight)) {
-    scrollingGreen = true;
-  }
-  
-  // Blue Section
-  if (didMouseClick(width/2 - sizeOfInputArea/2 + 2*sectionWidth, 0.47*height, sectionWidth, sectionHeight)) {
-    scrollingBlue = true;  
+  } else if (didMouseClick(width/2 - sizeOfInputArea/2 + 2*sectionWidth, 0.47*height, sectionWidth, sectionHeight)) {
+     scrollingBlue = true;
   }
 
-  //You are allowed to have a next button outside the 1" area
-  if (didMouseClick(600, 600, 200, 200)) //check if click is in next button
-  {
-    nextTrial(); //if so, advance to next trial
+  // Next button check  
+  if (didMouseClick(600, 600, 200, 200)) {
+     nextTrial();
   }
+
 }
 
 void mouseDragged() {
+  
   float scrollSpeed = 1; // Customize the scroll speed or implement a dynamic calculation based on drag speed.
   
   if (scrollingRed) {
@@ -209,17 +240,22 @@ void mouseDragged() {
     scrollBlue = constrain(scrollBlue, 0, max(0, lettersHeight - int(sectionHeight)));    
     // Optionally add 'pmouseY' to 'scrollRed' multiplied by a speed factor if you want to control scroll sensitivity.
   }
+  
+  letterHeight = int(0.25 * DPIofYourDeviceScreen); // Height of each letter line
+  
+  // Update visible indexes after scrolling
+  visibleRedStart = floor(scrollRed / letterHeight);
+  visibleGreenStart = floor(scrollGreen / letterHeight);
+  visibleBlueStart = floor(scrollBlue / letterHeight);
+  
 }
 
-
-
-
-
 void mouseReleased() {
-  // Reset all scrolling flags when the user releases the mouse.
-  scrollingRed = false;
-  scrollingGreen = false;
-  scrollingBlue = false;
+    // Wasn't dragged, process as click
+    // Reset all scrolling flags when the user releases the mouse.
+    scrollingRed = false;
+    scrollingGreen = false;
+    scrollingBlue = false;
 }
 
 
