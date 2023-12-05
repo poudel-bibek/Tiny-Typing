@@ -20,6 +20,7 @@ PImage finger;
 String[] lettersRed = {" a", " b", " c", " d", " e", " f", " g", " h", " i"};
 String[] lettersGreen = {" j", " k", " l", " m", " n", " o", " p", " q", " r"};
 String[] lettersBlue = {" s", " t", " u", " v", " w", " x", " y", " z"};
+String[] lettersNull = {"  ", "  ", "  ", "  " };
 int startIdxRed = 0, startIdxGreen = 0, startIdxBlue = 0;
 
 //Variables for my silly implementation. You can delete this:
@@ -40,8 +41,9 @@ int visibleGreenStart = 0;
 int visibleBlueStart = 0;
 int letterHeight;  
 
-float midX; 
-float rightX;
+float leftX = width / 2 - sizeOfInputArea / 2;  
+float midX = leftX + sectionWidth;
+float rightX = midX + sectionWidth;
 float topY;
 boolean dragging = false;
 int dragStartX, dragStartY;
@@ -292,17 +294,24 @@ void mouseReleased() {
     
     float letterHeight = int(0.25 * sizeOfInputArea); // Based on your letter height
   
-    if (mouseX < midX) {
+    if (mouseX >= leftX && mouseX < midX) {
       sectionLetters = lettersRed; 
       startIndex = visibleRedStart;
-  
-    } else if (mouseX < rightX) {
+      } 
+    else if (mouseX >= midX && mouseX < rightX) {
       sectionLetters = lettersGreen;
       startIndex = visibleGreenStart;
     
-    } else {
+      } 
+    else if (mouseX >= rightX && mouseX < rightX + sectionWidth){
       sectionLetters = lettersBlue;
       startIndex = visibleBlueStart; 
+      }
+      
+    else {
+      // Outside bounds - ignore
+      sectionLetters = lettersNull;
+      startIndex = 0; 
     }
     
     // Manual ranges
@@ -331,23 +340,11 @@ void mouseReleased() {
       // Remove the first space character
       if(letterClicked.charAt(0) == ' ') {
         letterClicked = letterClicked.substring(1); 
+          
       }
+      currentTyped += letterClicked; 
       
-      currentTyped += letterClicked;
-    
     }
-    
-    //int indexInSection = int((mouseY - topY) / letterHeight);
-    //println("mouseY" + indexInSection);
-    //println("topY" + indexInSection);
-    //println("Calculation" + (mouseY - topY) / letterHeight);
-    //println("Index" + indexInSection);
-    //if (indexInSection >= 0 && indexInSection < 3) {  
-    //  // Check valid letter index  
-    //  String letterClicked = sectionLetters[startIndex + indexInSection]; 
-    //  currentTyped += letterClicked; 
-    //}
-  
   }
   // Wasn't dragged, process as click
   // Reset all scrolling flags when the user releases the mouse.
