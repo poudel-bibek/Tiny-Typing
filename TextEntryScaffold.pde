@@ -17,9 +17,9 @@ final int DPIofYourDeviceScreen = 120; //you will need to look up the DPI or PPI
 final float sizeOfInputArea = DPIofYourDeviceScreen*1; //aka, 1.0 inches square!
 PImage watch;
 PImage finger;
-String[] lettersRed = {"A", "B", "C", "D", "E", "F", "G", "H", "I"};
-String[] lettersGreen = {"J", "K", "L", "M", "N", "O", "P", "Q", "R"};
-String[] lettersBlue = {"S", "T", "U", "V", "W", "X", "Y", "Z"};
+String[] lettersRed = {" a", " b", " c", " d", " e", " f", " g", " h", " i"};
+String[] lettersGreen = {" j", " k", " l", " m", " n", " o", " p", " q", " r"};
+String[] lettersBlue = {" s", " t", " u", " v", " w", " x", " y", " z"};
 int startIdxRed = 0, startIdxGreen = 0, startIdxBlue = 0;
 
 //Variables for my silly implementation. You can delete this:
@@ -49,6 +49,12 @@ int minDragDist = int(0.2*DPIofYourDeviceScreen);
 float calculation;
 int indexInSection;
 
+float backspaceWidth = 0.5 * sizeOfInputArea; 
+float backspaceHeight = 0.25 * sizeOfInputArea;
+
+float spacebarWidth = 0.5 * sizeOfInputArea;
+float spacebarHeight = 0.25 * sizeOfInputArea;
+
 //You can modify anything in here. This is just a basic implementation.
 void setup()
 {
@@ -73,7 +79,9 @@ void setup()
 void draw()
 {
   background(255); //clear background
-  
+  stroke(255); 
+  strokeWeight(0.5);
+    
    //check to see if the user finished. You can't change the score computation.
   if (finishTime!=0)
   {
@@ -95,8 +103,8 @@ void draw()
   }
   
   drawWatch(); //draw watch background
-  fill(100);
-  rect(width/2-sizeOfInputArea/2, height/2-sizeOfInputArea/2, sizeOfInputArea, sizeOfInputArea); //input area should be 1" by 1"
+  //fill(100);
+  //rect(width/2- 0.50*sizeOfInputArea, height/2- 0.50*sizeOfInputArea, sizeOfInputArea, sizeOfInputArea); //input area should be 1" by 1"
   
 
   if (startTime==0 & !mousePressed)
@@ -127,14 +135,29 @@ void draw()
     fill(255);
     text("NEXT > ", 650, 650); //draw next label
     
+
+    // Backspace
+    fill(0, 0, 0);  
+    rect(width/2 - sizeOfInputArea/2, 0.433*height, backspaceWidth, backspaceHeight, 5); 
+    fill(255, 255, 255); 
+    textAlign(CENTER, CENTER); 
+    text("Space", width/2 - 0.25*sizeOfInputArea, 0.433*height + backspaceHeight/2);
+
+    // Spacebar
+    fill(0, 0, 0);
+    rect(width/2 - sizeOfInputArea/2 + backspaceWidth, 0.433*height, spacebarWidth, spacebarHeight, 5);
+    fill(255, 255, 255); 
+    textAlign(CENTER, CENTER); 
+    text("<-", width/2 + 0.25*sizeOfInputArea, 0.433*height + backspaceHeight/2);
+    
     // Draw the keyboard layout
     float yOffset = 0.50 * height; // The vertical starting position of the letters.
     int lineHeight = int(0.25 * DPIofYourDeviceScreen); // Height of each letter line
     float sectionY = 0.48 * height;
 
     // Draw the Red section with scrolling:
-    fill(255, 0, 0);
-    rect(width / 2 - sizeOfInputArea / 2, 0.47 * height, sectionWidth, sectionHeight);
+    fill(0, 0, 0);
+    rect(width / 2 - sizeOfInputArea / 2, 0.47 * height, sectionWidth, sectionHeight, 5);
     fill(255, 255, 255);
     for (int i = 0; i < lettersRed.length; i++) {
       int letterY = int(yOffset - scrollRed + lineHeight * i);
@@ -144,8 +167,8 @@ void draw()
     }
 
     // Green section
-    fill(0, 255, 0); 
-    rect(width/2-sizeOfInputArea/2 + sectionWidth, 0.47*height, sectionWidth, sectionHeight);
+    fill(0, 0, 0); 
+    rect(width/2-sizeOfInputArea/2 + sectionWidth, 0.47*height, sectionWidth, sectionHeight, 5);
     fill(255, 255, 255);
     for (int i = 0; i < lettersGreen.length; i++) {
       int letterY = int(yOffset - scrollGreen + lineHeight * i);
@@ -155,8 +178,8 @@ void draw()
     }
     
     // Blue section
-    fill(0, 0, 255);
-    rect(width/2-sizeOfInputArea/2 + 2*sectionWidth, 0.47*height, sectionWidth, sectionHeight); 
+    fill(0, 0, 0);
+    rect(width/2-sizeOfInputArea/2 + 2*sectionWidth, 0.47*height, sectionWidth, sectionHeight, 5); 
     fill(255, 255, 255);
     for (int i = 0; i < lettersBlue.length; i++) {
       int letterY = int(yOffset - scrollBlue + lineHeight * i);
@@ -164,7 +187,6 @@ void draw()
         text(lettersBlue[i], width/2 - sizeOfInputArea/2 + 2*sectionWidth + 10, letterY);
       }
     }
-    
   }
  
   //drawFinger(); //no longer needed as we'll be deploying to an actual touschreen device
@@ -177,6 +199,29 @@ boolean didMouseClick(float x, float y, float w, float h) //simple function to d
 }
 
 void mousePressed() {
+  // Spacebar
+  if(mouseX >= (width/2 - sizeOfInputArea/2) && 
+     mouseX <= (width/2 - sizeOfInputArea/2 + backspaceWidth) &&
+     mouseY >= 0.433*height &&  
+     mouseY <= (0.433*height + backspaceHeight)) 
+  {
+    // Spacebar functionality
+    currentTyped += " ";
+    
+  }
+
+  // Backspace 
+  if(mouseX >= (width/2 - sizeOfInputArea/2 + backspaceWidth) &&
+     mouseX <= (width/2 - sizeOfInputArea/2 + backspaceWidth + spacebarWidth) && 
+     mouseY >= 0.433*height &&
+     mouseY <= (0.433*height + spacebarHeight))
+   {
+     // Backspace functionality
+     if(currentTyped.length() > 0) {
+      currentTyped = currentTyped.substring(0, currentTyped.length()-1);
+    }
+   }
+   
   dragging = false; 
   dragStartX = mouseX;
   dragStartY = mouseY; 
@@ -281,7 +326,15 @@ void mouseReleased() {
     if (indexInSection >= 0 && indexInSection < 3) {  
       // Check valid letter index  
       String letterClicked = sectionLetters[startIndex + indexInSection]; 
-      currentTyped += letterClicked; 
+      //currentTyped += letterClicked; 
+      
+      // Remove the first space character
+      if(letterClicked.charAt(0) == ' ') {
+        letterClicked = letterClicked.substring(1); 
+      }
+      
+      currentTyped += letterClicked;
+    
     }
     
     //int indexInSection = int((mouseY - topY) / letterHeight);
